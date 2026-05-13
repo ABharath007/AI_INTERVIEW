@@ -1,0 +1,49 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 12px 30px;
+   background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e0e6f5;
+  color: #333;
+  position: sticky;
+  top: 0;
+}
+
+/* LEFT (logo stays left) */
+.nav-left {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* CENTER buttons */
+.nav-right {
+  flex: 1; /* 🔥 takes remaining space */
+  display: flex;
+  justify-content: center; /* 🔥 centers buttons */
+  gap: 20px;
+}
+
+.navbar button {
+  background: transparent;
+  border: none; /* ❌ remove border */
+  color: var(--primary);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 6px 10px;
+  cursor: pointer;
+  position: relative;
+}
+.navbar button:hover {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  border-radius: 8px;
+}
+
+.navbar button.active {
+  background: var(--primary);
+  color: white;
+  border-radius: 8px;
+}
+
+

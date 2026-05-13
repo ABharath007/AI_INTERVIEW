@@ -1,0 +1,45 @@
+.analysis-card {
+  background: white;
+  border-radius: 14px;
+  padding: 22px;
+  margin: 20px 0;
+  box-shadow: 0 5px 14px rgba(0,0,0,0.08);
+}
+
+/* Stats section */
+.stats {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  gap:15px;
+}
+
+.stat-box {
+  width: 30%;
+  flex: 1;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 500;
+  background: var(--primary-light);
+  border: 1px solid var(--border);
+  color: var(--text-dark);
+
+}
+
+.stat-box h3 {
+  margin: 0;
+  color: var(--primary);
+}
+
+/* Lists */
+ul {
+  padding-left: 20px;
+}
+
+.stat-box span {
+  display: block;
+  font-size: 22px;
+  color: var(--primary);
+  margin-top: 5px;
+}

@@ -1,0 +1,48 @@
+.login-card {
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 25px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.login-card input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.login-card input:focus {
+  outline: none;
+  border: 1px solid var(--primary);
+}
+
+.auth-switch {
+  font-size: 14px;
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+
+}
+
+.auth-switch span {
+  color: var(--primary);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.auth-switch span:hover {
+  text-decoration: underline;
+}
+
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
