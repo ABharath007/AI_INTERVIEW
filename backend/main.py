@@ -1,0 +1,167 @@
+from fastapi import FastAPI, Depends, Query, HTTPException
+from schemas import AnswerCreate , AnswerResponse, UserCreate, UserLogin
+from database import engine, Base ,SessionLocal, get_db
+import models
+from sqlalchemy.orm import Session
+import crud
+from typing import List, Optional
+import json, re, random
+from fastapi.middleware.cors import CORSMiddleware
+from auth_utils import hash_password, verify_password
+
+
+
+    
+
+app = FastAPI()
+Base.metadata.create_all(bind = engine)
+FOCUS_RATIO = 0.7
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # allow all (for development)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/")
+
+def home():
+    return {"message": "Interview AI backend running"}
+
+@app.post("/answer",response_model=AnswerResponse)
+def submit_answer(data: AnswerCreate, db: Session = Depends(get_db)):
+    
+    if data.total_time < 0 or data.total_time > 3600:
+        raise HTTPException(status_code=400, detail="Invalid time")
+    
+    ai_result = crud.evaluate_answer_ai(data.question, data.answer, data.time_to_start, data.time_to_answer, data.total_time)
+    try:
+        parsed = json.loads(ai_result)
+        score  = parsed["score"]
+        feedback = parsed["feedback"]
+    except Exception:
+        score = 0
+        feedback = ai_result
+    answer = crud.create_answer(db, data,score,feedback)
+
+    return {
+        "id": answer.id,
+        "question": data.question,
+        "answer_text": answer.answer_text,
+        "time_to_start": answer.time_to_start,
+        "time_to_answer": answer.time_to_answer,
+        "total_time": answer.total_time,
+        "word_count": answer.word_count,
+        "score": score,
+        "feedback": feedback
+        }
+
+
+@app.get("/question")
+def get_question(
+                db: Session = Depends(get_db),
+                topic: Optional[str] = None,
+                difficulty: Optional[str] = None
+    ):
+    answers = crud.get_answers(db)
+    
+    if not answers or len(answers) < 3:
+        return {"question": crud.generate_question_ai(topic, difficulty)}
+    
+    
+    try:
+        analysis = crud.analyze_performance_ai(answers)
+        match = re.search(r'\{.*\}', analysis, re.DOTALL)
+        if match:
+            parsed = json.loads(match.group())
+            weak_areas = parsed.get("weak_areas", [])
+        else:
+            weak_areas = []
+        if not topic:   # only override if user didn't select
+            if weak_areas and random.random() < FOCUS_RATIO:
+                topic = random.choice(weak_areas)
+            
+        question = crud.generate_question_ai(topic, difficulty)
+        
+    except Exception as e :
+        print(f"Error occurred: {e}")
+        question = crud.generate_question_ai(topic, difficulty)
+        
+    return {"question": question}
+
+    
+
+@app.get("/answers")
+def get_answers(
+                user_id: int,
+                db: Session = Depends(get_db),
+                min_score: Optional[int] = Query(None),
+                sort: Optional[str] = Query(None),
+                limit: Optional[int] = Query(None)
+                ):
+    query = db.query(models.Answer).filter(models.Answer.user_id == user_id)
+    
+    if min_score is not None:
+        query = query.filter(models.Answer.score >= min_score)
+    if sort == "asc":
+        query = query.order_by(models.Answer.id.asc())
+    elif sort == "desc":
+        query = query.order_by(models.Answer.id.desc())
+    if limit is not None:
+        query = query.limit(limit)
+    return query.all()
+
+@app.get("/analysis")
+def get_analysis(
+                db: Session = Depends(get_db),
+                user_id: int = Query(...)
+    ):
+    answers = db.query(models.Answer).filter(models.Answer.user_id == user_id).all()
+    if not answers:
+        return {"weak_areas": [], "strong_areas": [],"total_questions": 0,
+            "average_score": 0,
+            "best_score": 0}
+    total_questions = len(answers)
+    scores = [a.score for a in answers]
+    average_score = sum(scores) / len(scores)
+    best_score = max(scores)
+    ai_result = crud.analyze_performance_ai(answers)
+    try:
+        parsed = json.loads(ai_result)
+    except:
+        return {"analysis": ai_result}
+    return {
+        "weak_areas": parsed.get("weak_areas", []),
+        "strong_areas": parsed.get("strong_areas", []),
+        "total_questions": total_questions,
+        "average_score": round(average_score, 2),
+        "best_score": best_score
+    }
+
+@app.post("/register")
+def register(user: UserCreate, db: Session = Depends(get_db)):
+    existing = db.query(models.User).filter(models.User.email == user.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    db_user  = models.User(
+        username = user.username,
+        email = user.email,
+        password = hash_password(user.password)
+    )
+    db.add(db_user)
+    db.commit()
+    return {"message": "User registered successfully"}
+
+@app.post("/login")
+def login(user: UserLogin, db:Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.email == user.email).first()
+    
+    if not db_user or not verify_password(user.password, db_user.password):
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+    
+    return {
+        "user_id": db_user.id,
+        "username": db_user.username,
+        }
