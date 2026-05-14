@@ -153,6 +153,8 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
     if existing_username:
         raise HTTPException(status_code=400, detail="Username already taken")
+    print("PASSWORD RECEIVED:", user.password)
+    print("LENGTH:", len(user.password))
 
     db_user = models.User(
         username = user.username,
