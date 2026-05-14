@@ -18,7 +18,10 @@ Base.metadata.create_all(bind = engine)
 FOCUS_RATIO = 0.7
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # allow all (for development)
+    allow_origins=[
+        "http://localhost:5173",
+        "https://ai-interview-frontend-xrvs.onrender.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
