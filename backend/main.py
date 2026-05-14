@@ -145,16 +145,23 @@ def get_analysis(
 
 @app.post("/register")
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(models.User).filter(models.User.email == user.email).first()
-    if existing:
+    existing_email = db.query(models.User).filter(models.User.email == user.email).first()
+    existing_username = db.query(models.User).filter(models.User.username == user.username).first()
+
+    if existing_email:
         raise HTTPException(status_code=400, detail="Email already registered")
-    db_user  = models.User(
+
+    if existing_username:
+        raise HTTPException(status_code=400, detail="Username already taken")
+
+    db_user = models.User(
         username = user.username,
         email = user.email,
         password = hash_password(user.password)
     )
     db.add(db_user)
     db.commit()
+    db.refresh(db_user)
     return {"message": "User registered successfully"}
 
 @app.post("/login")
