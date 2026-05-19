@@ -9,6 +9,11 @@ from typing import List, Optional
 import json, re, random
 from fastapi.middleware.cors import CORSMiddleware
 from auth_utils import hash_password, verify_password
+from google.oauth2 import id_token
+from google.auth.transport import requests
+import os
+from dotenv import load_dotenv
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"), override=True)
 
 
 
@@ -178,3 +183,32 @@ def login(user: UserLogin, db:Session = Depends(get_db)):
         "access_token": token,
         "token_type": "bearer"
         }
+    
+@app.post("/google-login")
+def google_login(data: dict, db: Session = Depends(get_db)):
+    
+    token = data["token"]
+    idinfo = id_token.verify_oauth2_token(token, requests.Request(), os.getenv("GOOGLE_CLIENT_ID"))
+    
+    email = idinfo["email"]
+    username = idinfo.get("name", "Google User")
+    
+    user = db.query(models.User).filter(
+        models.User.email == email
+    ).first()
+    
+    if not user:
+        user = models.User(
+            username=username,
+            email=email,
+            password = hash_password(os.urandom(16).hex())
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    access_token = create_access_token(data={"user_id": user.id})
+    
+    return {
+        "access_token": access_token,
+        "username": user.username,
+    }

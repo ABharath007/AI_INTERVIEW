@@ -1,6 +1,7 @@
 import { useState} from "react";
 import '../style/Login_Register.css';
 import logo from "../assets/logo.png";
+import { GoogleLogin } from "@react-oauth/google";
 
 function Login({ onLogin, onSwitch }) {
     const [email, setEmail] = useState("");
@@ -23,12 +24,28 @@ function Login({ onLogin, onSwitch }) {
             const data = await res.json();
 
             localStorage.setItem("token", data.access_token);
-            localStorage.setItem("user_name", data.username);
+            localStorage.setItem("username", data.username);
             onLogin();
         } catch (err) {
             setError(err.message);
         }
     };
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/google-login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token: credentialResponse.credential }),
+        });
+        const data = await res.json();
+
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("username", data.username);
+        onLogin();
+    }
+
     return (
         <div className="auth-page">
             <img src={logo} alt="InterviAI" className="page-logo" />
@@ -67,6 +84,10 @@ function Login({ onLogin, onSwitch }) {
       Don't have an account?
       <span onClick={() => onSwitch("register")}> Register</span>
     </p>
+    <GoogleLogin
+  onSuccess={handleGoogleSuccess}
+  onError={() => console.log("Google Login Failed")}
+/>
             
         </form>
         </div>
