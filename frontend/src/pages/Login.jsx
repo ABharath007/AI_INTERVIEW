@@ -1,5 +1,6 @@
 import { useState} from "react";
 import '../style/Login_Register.css';
+import logo from "../assets/logo.png";
 
 function Login({ onLogin, onSwitch }) {
     const [email, setEmail] = useState("");
@@ -28,7 +29,9 @@ function Login({ onLogin, onSwitch }) {
     };
     return (
         <div className="auth-page">
+            <img src={logo} alt="InterviAI" className="page-logo" />
         <div className = "login-card">
+            
             <h2>Login</h2>
             <input
                 placeholder = "Email"

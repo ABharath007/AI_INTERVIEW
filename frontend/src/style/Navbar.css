@@ -1,13 +1,28 @@
-.navbar {
-  display: flex;
-  align-items: center;
-  padding: 12px 30px;
-   background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid #e0e6f5;
-  color: #333;
-  position: sticky;
-  top: 0;
+.navbar{
+  height:80px;
+  background:white;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 60px;
+  position:relative;
+}
+
+.brand{
+  position:relative;
+  width:180px;
+  height:80px;
+  overflow:visible;
+  display:flex;
+  align-items:center;
+}
+
+.logo{
+  position:absolute;
+  width:170px;
+  top:-22px;
+  left:-20px;
+  object-fit:contain;
 }
 
 /* LEFT (logo stays left) */
@@ -45,5 +60,3 @@
   color: white;
   border-radius: 8px;
 }
-
-

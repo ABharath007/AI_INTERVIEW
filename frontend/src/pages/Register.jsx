@@ -1,5 +1,6 @@
 import { useState } from "react";
 import '../style/Login_Register.css';
+import logo from "../assets/logo.png";
 
 function Register({ onRegisterSuccess, onSwitch }) {
   const [username, setUsername] = useState("");
@@ -29,7 +30,9 @@ alert("Registered successfully");
 
   return (
     <div className="auth-page">
+      <img src={logo} alt="InterviAI" className="page-logo" />
     <div className="login-card">
+      
       <h2>Register</h2>
 
        <input value={username} onChange={(e)=>setUsername(e.target.value)} placeholder="Username" />

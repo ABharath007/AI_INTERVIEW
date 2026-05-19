@@ -46,3 +46,10 @@
   height: 100vh;
 }
 
+.page-logo{
+  position:absolute;
+  top:20px;
+  left:35px;
+  width:190px;
+  object-fit:contain;
+}
