@@ -1,7 +1,8 @@
 .login-card {
   max-width: 400px;
+  width:420px;
   margin: 80px auto;
-  padding: 25px;
+  padding: 40px;
   background: white;
   border-radius: 14px;
   box-shadow: 0 6px 16px rgba(0,0,0,0.1);
@@ -52,4 +53,27 @@
   left:35px;
   width:190px;
   object-fit:contain;
+}
+
+.password-box{
+  position:relative;
+  width:100%;
+  display:flex;
+  align-items:center;
+}
+
+.password-box input{
+  width:100%;
+}
+
+.toggle-password{
+  position:absolute;
+  right:15px;
+  top:50%;
+  transform:translateY(-50%);
+  cursor:pointer;
+  color:#2563eb;
+  font-size:14px;
+  font-weight:600;
+  user-select:none;
 }

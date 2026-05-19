@@ -6,6 +6,7 @@ function Login({ onLogin, onSwitch }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
     const handleLogin = async () =>{
         try{
             setError(null);
@@ -38,12 +39,21 @@ function Login({ onLogin, onSwitch }) {
                 value = {email}
                 onChange={(e) => setEmail(e.target.value)}
             />
+            <div className="password-box">
             <input
-                placeholder = "Password"
-                type = "password"
-                value = {password}
-                onChange={(e) => setPassword(e.target.value)}
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
             />
+
+            <span
+            className="toggle-password"
+            onClick={() => setShowPassword(!showPassword)}
+            >
+            {showPassword ? "Hide" : "Show"}
+            </span>
+            </div>
             <button onClick={handleLogin}>Login</button>
             {error && <p className = "error">{error}</p>}
             <p className="auth-switch">

@@ -6,6 +6,7 @@ function Register({ onRegisterSuccess, onSwitch }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleRegister = async () => {
     const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/register`, {
@@ -37,7 +38,21 @@ alert("Registered successfully");
 
        <input value={username} onChange={(e)=>setUsername(e.target.value)} placeholder="Username" />
       <input value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="Email" />
-      <input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="Password" />
+      <div className="password-box">
+            <input
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            />
+
+            <span
+            className="toggle-password"
+            onClick={() => setShowPassword(!showPassword)}
+            >
+            {showPassword ? "Hide" : "Show"}
+            </span>
+            </div>
 
       <button onClick={handleRegister}>
         Register
