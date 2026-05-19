@@ -22,7 +22,8 @@ function Login({ onLogin, onSwitch }) {
             }
             const data = await res.json();
 
-            localStorage.setItem("user_id", data.user_id);
+            localStorage.setItem("token", data.access_token);
+            localStorage.setItem("user_name", data.username);
             onLogin();
         } catch (err) {
             setError(err.message);
@@ -31,13 +32,18 @@ function Login({ onLogin, onSwitch }) {
     return (
         <div className="auth-page">
             <img src={logo} alt="InterviAI" className="page-logo" />
-        <div className = "login-card">
+        <form className = "login-card"
+        onSubmit={(e) => {
+        e.preventDefault();
+        handleLogin();
+        }}>
             
             <h2>Login</h2>
             <input
                 placeholder = "Email"
                 value = {email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
             />
             <div className="password-box">
             <input
@@ -45,6 +51,7 @@ function Login({ onLogin, onSwitch }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
+            autoComplete="current-password"
             />
 
             <span
@@ -54,14 +61,14 @@ function Login({ onLogin, onSwitch }) {
             {showPassword ? "Hide" : "Show"}
             </span>
             </div>
-            <button onClick={handleLogin}>Login</button>
+            <button type ="submit">Login</button>
             {error && <p className = "error">{error}</p>}
             <p className="auth-switch">
       Don't have an account?
       <span onClick={() => onSwitch("register")}> Register</span>
     </p>
             
-        </div>
+        </form>
         </div>
     );
 }

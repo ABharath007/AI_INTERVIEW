@@ -9,13 +9,14 @@ import './App.css';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(
-    localStorage.getItem("user_id") !== null
+    localStorage.getItem("token") !== null
   );
 
   const [authPage, setAuthPage] = useState("login"); // login | register
   const [page, setPage] = useState("home"); // home | history
   const handleLogout = () => {
-    localStorage.removeItem("user_id");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user_name");
     setLoggedIn(false);
     setAuthPage("login");
     setPage("home");

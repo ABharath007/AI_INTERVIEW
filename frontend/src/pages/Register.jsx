@@ -37,13 +37,14 @@ alert("Registered successfully");
       <h2>Register</h2>
 
        <input value={username} onChange={(e)=>setUsername(e.target.value)} placeholder="Username" />
-      <input value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="Email" />
+      <input value={email} onChange={(e)=>setEmail(e.target.value) } placeholder="Email" autoComplete="email" />
       <div className="password-box">
             <input
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
+            autoComplete="new-password"
             />
 
             <span

@@ -4,6 +4,7 @@ from database import engine, Base ,SessionLocal, get_db
 import models
 from sqlalchemy.orm import Session
 import crud
+from auth import create_access_token
 from typing import List, Optional
 import json, re, random
 from fastapi.middleware.cors import CORSMiddleware
@@ -153,9 +154,6 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
     if existing_username:
         raise HTTPException(status_code=400, detail="Username already taken")
-    print("PASSWORD RECEIVED:", user.password)
-    print("LENGTH:", len(user.password))
-
     db_user = models.User(
         username = user.username,
         email = user.email,
@@ -172,8 +170,11 @@ def login(user: UserLogin, db:Session = Depends(get_db)):
     
     if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
+    token = create_access_token(data={"user_id": db_user.id})
     
     return {
         "user_id": db_user.id,
         "username": db_user.username,
+        "access_token": token,
+        "token_type": "bearer"
         }
