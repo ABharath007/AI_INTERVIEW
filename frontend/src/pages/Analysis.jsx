@@ -4,16 +4,17 @@ import '../style/Analysis.css';
 function Analysis() {
     const [analysis, setAnalysis] = useState();
     const [error, setError] = useState(null);
-
-    const user_id = localStorage.getItem("user_id");
-    if (!user_id) {
-  return <p>Please login again</p>;
-}
+    const token = localStorage.getItem("token");
+    
 
     useEffect(() => {
         const fetchAnalysis = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/analysis?user_id=${user_id}`);
+                const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/analysis`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
                 const data = await res.json();
                 setAnalysis(data);
             } catch (err) {

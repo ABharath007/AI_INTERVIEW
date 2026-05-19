@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 
 class AnswerCreate(BaseModel):
-    user_id: int
     question: str
     answer: str
     time_to_start: int

@@ -32,7 +32,7 @@ alert("Registered successfully");
   return (
     <div className="auth-page">
       <img src={logo} alt="InterviAI" className="page-logo" />
-    <div className="login-card">
+    <form className="login-card">
       
       <h2>Register</h2>
 
@@ -62,7 +62,7 @@ alert("Registered successfully");
   Already have an account?
   <span onClick={() => onSwitch("login")}> Login</span>
 </p>
-    </div>
+    </form>
     </div>
   );
 }

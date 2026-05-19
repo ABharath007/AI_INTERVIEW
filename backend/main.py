@@ -4,7 +4,7 @@ from database import engine, Base ,SessionLocal, get_db
 import models
 from sqlalchemy.orm import Session
 import crud
-from auth import create_access_token
+from auth import create_access_token, get_current_user
 from typing import List, Optional
 import json, re, random
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,7 +35,7 @@ def home():
     return {"message": "Interview AI backend running"}
 
 @app.post("/answer",response_model=AnswerResponse)
-def submit_answer(data: AnswerCreate, db: Session = Depends(get_db)):
+def submit_answer(data: AnswerCreate, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     
     if data.total_time < 0 or data.total_time > 3600:
         raise HTTPException(status_code=400, detail="Invalid time")
@@ -48,7 +48,7 @@ def submit_answer(data: AnswerCreate, db: Session = Depends(get_db)):
     except Exception:
         score = 0
         feedback = ai_result
-    answer = crud.create_answer(db, data,score,feedback)
+    answer = crud.create_answer(db, data, current_user, score, feedback)
 
     return {
         "id": answer.id,
@@ -99,13 +99,13 @@ def get_question(
 
 @app.get("/answers")
 def get_answers(
-                user_id: int,
+                current_user: int = Depends(get_current_user),
                 db: Session = Depends(get_db),
                 min_score: Optional[int] = Query(None),
                 sort: Optional[str] = Query(None),
                 limit: Optional[int] = Query(None)
                 ):
-    query = db.query(models.Answer).filter(models.Answer.user_id == user_id)
+    query = db.query(models.Answer).filter(models.Answer.user_id == current_user)
     
     if min_score is not None:
         query = query.filter(models.Answer.score >= min_score)
@@ -120,9 +120,9 @@ def get_answers(
 @app.get("/analysis")
 def get_analysis(
                 db: Session = Depends(get_db),
-                user_id: int = Query(...)
+                current_user: int = Depends(get_current_user)
     ):
-    answers = db.query(models.Answer).filter(models.Answer.user_id == user_id).all()
+    answers = db.query(models.Answer).filter(models.Answer.user_id == current_user).all()
     if not answers:
         return {"weak_areas": [], "strong_areas": [],"total_questions": 0,
             "average_score": 0,

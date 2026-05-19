@@ -7,11 +7,7 @@ function History({ setPage }) {
     const [sort, setSort] = useState("");
     const [ error, setError ] = useState(null);
     const [expandedId, setExpandedId] = useState(null);
-
-    const user_id = localStorage.getItem("user_id");
-    if (!user_id) {
-  return <p>Please login again</p>;
-}
+    const token = localStorage.getItem("token");
 
     const toggleExpand = (id) => {
         setExpandedId(expandedId === id ? null : id);
@@ -19,11 +15,15 @@ function History({ setPage }) {
 
     const fetchAnswers = async () => {
         try {
-            let url = `${import.meta.env.VITE_API_BASE_URL}/answers?user_id=${user_id}`;
-            if(minScore)url+=`&min_score=${minScore}`;
-            if(sort)url+=`&sort=${sort}`;
+            let url = `${import.meta.env.VITE_API_BASE_URL}/answers?`;
+            if(minScore)url+=`min_score=${minScore}&`;
+            if(sort)url+=`sort=${sort}`;
 
-            const res = await fetch(url);
+            const res = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             const data = await res.json();
             setAnswers(data);
         } catch (err) {

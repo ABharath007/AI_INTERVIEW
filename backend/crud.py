@@ -11,13 +11,13 @@ if not api_key:
     raise Exception("GROQ_API_KEY not set")
 client = Groq(api_key=api_key)
 
-def create_answer(db: Session, answer: schemas.AnswerCreate, score: int, feedback: str):
+def create_answer(db: Session, answer: schemas.AnswerCreate, current_user: int, score: int, feedback: str):
     
     answer_text = answer.answer
     word_count = len(answer_text.split())
     
     db_answer = models.Answer(
-                              user_id = answer.user_id,
+                              user_id = current_user,
                               question = answer.question,
                               answer_text = answer_text,
                               time_to_start = answer.time_to_start,

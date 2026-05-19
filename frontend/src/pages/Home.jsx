@@ -13,12 +13,6 @@ function Home({ onLogout }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-
-  const user_id = localStorage.getItem("user_id");
-  if (!user_id) {
-  return <p>Please login again</p>;
-}
-
   // Load question
   const loadQuestion = async () => {
     try {
@@ -82,10 +76,10 @@ function Home({ onLogout }) {
       const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/answer`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
         },
         body: JSON.stringify({
-          user_id,
           question,
           answer,
           time_to_start,
