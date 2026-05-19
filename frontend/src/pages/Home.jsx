@@ -151,6 +151,10 @@ function Home({ onLogout }) {
           value={answer}
           onChange={handleChange}
           placeholder="Type your answer here..."
+          onPaste={(e) => {
+          e.preventDefault();
+          alert("Pasting is not allowed!");
+          }}   
         />
       </div>
       </div>
