@@ -16,54 +16,16 @@
   transform: translateY(-3px);
 }
 
-/* Question styling */
+/* QUESTION */
 .question-text {
   font-size: 18px;
   font-weight: 500;
   text-align: center;
-}
-
-/* Textarea */
-textarea {
-  width: 100%;
-  height: 130px;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  resize: none;
-  font-size: 14px;
-  transition: border 0.2s;
-}
-
-textarea:focus {
-  outline: none;
-  border: 1px solid var(--primary);
-}
-
-/* Dropdown */
-select {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  margin: 5px;
-}
-
-/* Feedback */
-.feedback-box {
-  border-left: 5px solid #2ecc71;
-  padding-left: 10px;
-}
-
-/* Error */
-.error {
-  color: red;
-  text-align: center;
+  line-height: 1.6;
 }
 
 .question-box {
   text-align: center;
-  font-size: 16px;
-  font-weight: 500;
   background: linear-gradient(
     135deg,
     var(--primary-light),
@@ -72,19 +34,93 @@ select {
   border: 1px solid var(--border);
 }
 
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  margin-top: 20px;
+/* TEXTAREA */
+textarea {
+  width: 100%;
+  height: 180px;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  resize: none;
+  font-size: 15px;
+  transition: border 0.2s;
+  line-height: 1.6;
 }
 
-/* FIX BUTTON SIZE */
-.action-buttons button {
-  min-width: 140px;
-  height: 45px;
-  padding: 0 16px;
-  border-radius: 10px;
-  font-size: 14px;
+textarea:focus {
+  outline: none;
+  border: 1px solid var(--primary);
+}
+
+/* DROPDOWN */
+select {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin: 5px;
+  font-size: 15px;
+}
+
+/* BUTTON SECTION */
+.submit-section {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+/* SMALL BUTTONS */
+.small-btn {
+  min-width: 160px !important;
+  height: 44px !important;
+  font-size: 15px !important;
+  border-radius: 10px !important;
+  padding: 0 18px !important;
+}
+
+/* FEEDBACK */
+.feedback-card {
+  margin-top: 30px;
+}
+
+.feedback-card h3 {
+  font-size: 22px;
+  margin-bottom: 16px;
+  color: var(--primary);
+}
+
+.feedback-card p {
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ERROR */
+.error {
+  color: red;
+  text-align: center;
+  margin-top: 15px;
+  font-size: 15px;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+  .question-text {
+    font-size: 17px;
+  }
+
+  textarea {
+    height: 160px;
+  }
+
+  .submit-section {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .small-btn {
+    width: 100%;
+  }
+
 }

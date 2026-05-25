@@ -212,3 +212,32 @@ def google_login(data: dict, db: Session = Depends(get_db)):
         "access_token": access_token,
         "username": user.username,
     }
+@app.post("/followup")
+def generate_folowup(data:dict):
+    question = data["question"]
+    answer = data["answer"]
+    
+    prompt = f"""
+    You are a technical interviewer.
+
+    Original Question:
+    {question}
+
+    Candidate Answer:
+    {answer}
+
+    Generate ONLY ONE concise follow-up interview question.
+
+Rules:
+- Return ONLY the question
+- No explanations
+- No praise
+- No extra text
+- No "Your answer is correct"
+- Maximum 1 sentence
+    """
+
+    followup = crud.ask_groq(prompt)
+
+    return {"followup": followup}
+    

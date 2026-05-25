@@ -12,6 +12,8 @@ function Home({ onLogout }) {
   const [difficulty, setDifficulty] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [followUpQuestion, setFollowUpQuestion] = useState("");
+  const [followUpCount, setFollowUpCount] = useState(0);
 
   // Load question
   const loadQuestion = async () => {
@@ -34,6 +36,8 @@ function Home({ onLogout }) {
       setFeedback(null);
       setFirstInputTime(null);
       setStartTime(Date.now());
+      setFollowUpQuestion("");
+      setFollowUpCount(0);
 
     } catch (err) {
       setError("Failed to load question");
@@ -101,85 +105,165 @@ function Home({ onLogout }) {
       setLoading(false);
     }
   };
+  const handleFollowUp = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/followup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({
+          question,
+          answer
+        })
+      });
+      const data = await res.json();
+      setQuestion(data.followup);
+      setAnswer("");
+      setFollowUpCount(followUpCount + 1);
+      setFeedback(null);
+      setStartTime(Date.now());
+      setFirstInputTime(null);
+    } catch (err) {
+      setError("Failed to get follow-up question");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  return (
-    <div className = "main-section">
+return (
+  <div className="main-section">
     <div className="container">
+
       <h1>Interview Practice</h1>
-      <div className = "section">
-      <div className="home-card">
-        <h3> Select Topic and Difficulty </h3>
-        <select value ={topic} onChange={(e) => setTopic(e.target.value)}>
-          <option value="">Any Topic</option>
-          <option value = "DSA">DSA</option>
-          <option value = "System Design">System Design</option>
-          <option value = "OOP">OOP</option>
-          <option value = "DBMS">DBMS</option>
-          <option value = "OS">OS</option>
-        </select>
-        <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} style={{marginLeft: "10px"}}>
-          <option value="">Any Difficulty</option>
-          <option value = "Easy">Easy</option>
-          <option value = "Medium">Medium</option>
-          <option value = "Hard">Hard</option>
-        </select>
-        
-        <button
-  onClick={() => {
-    loadQuestion();
-    setStarted(true);
-  }}
-  disabled={loading}
-  style={{ marginLeft: "10px" }}
->
-  {started ? "Next Question" : "Start Interview"}
-</button>
-      </div>
-      </div>
-      <div className = "section">
-        {question && (
-      <div className="home-card question-box">
-      <h2 className="question-text">{question}</h2>
-      </div>
-)}
-      
-      </div>
-      <div className = "section">
 
-      <div className="home-card answer">
-        <textarea
-          value={answer}
-          onChange={handleChange}
-          placeholder="Type your answer here..."
-          onPaste={(e) => {
-          e.preventDefault();
-          alert("Pasting is not allowed!");
-          }}   
-        />
-      </div>
-      </div>
-      <div className = "action-buttons">
-      <div className = "button-group">
-      <button
-        onClick={handleSubmit}
-        disabled={loading || !answer.trim() || !question}
-      >
-        {loading ? "Submitting..." : "Submit Answer"}
-      </button>
-      </div>
-      {error && <p className="error">{error}</p>}
+      {/* TOP SECTION */}
+      <div className="section">
+        <div className="home-card">
 
-      {feedback && (
-        <div className="card feedback">
-          <h3>Score: {feedback.score}/10</h3>
-          <p>{feedback.feedback}</p>
+          <h3>Select Topic and Difficulty</h3>
+
+          <select
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+          >
+            <option value="">Any Topic</option>
+            <option value="DSA">DSA</option>
+            <option value="System Design">System Design</option>
+            <option value="OOP">OOP</option>
+            <option value="DBMS">DBMS</option>
+            <option value="OS">OS</option>
+          </select>
+
+          <select
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value)}
+            style={{ marginLeft: "10px" }}
+          >
+            <option value="">Any Difficulty</option>
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+          </select>
+
         </div>
+      </div>
+
+      {/* QUESTION */}
+      <div className="section">
+        {question && (
+          <div className="home-card question-box">
+            <h2 className="question-text">{question}</h2>
+          </div>
+        )}
+      </div>
+
+      {/* ANSWER */}
+      <div className="section">
+        <div className="home-card">
+
+          <textarea
+            value={answer}
+            onChange={handleChange}
+            placeholder="Type your answer here..."
+            onPaste={(e) => {
+              e.preventDefault();
+              alert("Pasting is not allowed!");
+            }}
+          />
+
+        </div>
+      </div>
+
+      {/* FEEDBACK */}
+      {feedback && (
+
+        <div className="home-card feedback-card">
+
+          <h3>Score: {feedback.score}/10</h3>
+
+          <p>{feedback.feedback}</p>
+
+        </div>
+
       )}
-    
+
+      {/* BUTTONS */}
+      <div className="submit-section">
+
+        <button
+          onClick={handleSubmit}
+          disabled={loading || !answer.trim() || !question}
+          className="small-btn"
+        >
+          {loading ? "Submitting..." : "Submit"}
+        </button>
+
+        {!feedback && (
+          <button
+            onClick={() => {
+              loadQuestion();
+              setStarted(true);
+            }}
+            className="small-btn"
+          >
+            {started ? "Next Question" : "Start Interview"}
+          </button>
+        )}
+
+        {feedback && (
+          <>
+            <button
+              onClick={handleFollowUp}
+              className="small-btn"
+            >
+              Follow-Up
+            </button>
+
+            <button
+              onClick={() => {
+                loadQuestion();
+              }}
+              className="small-btn"
+            >
+              Next Question
+            </button>
+          </>
+        )}
+
+      </div>
+
+      {/* ERROR */}
+      {error && (
+        <p className="error">{error}</p>
+      )}
+
     </div>
-    </div>
-    </div>
-  );
+  </div>
+);
 }
 
 export default Home;
