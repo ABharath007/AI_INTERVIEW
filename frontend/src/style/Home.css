@@ -103,6 +103,17 @@ select {
   font-size: 15px;
 }
 
+.mode-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
 /* MOBILE */
 @media (max-width: 768px) {
 

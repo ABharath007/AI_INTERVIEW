@@ -21,7 +21,8 @@ function Register({ onRegisterSuccess, onSwitch }) {
   return;
 }
 
-alert("Registered successfully");
+const errorData = await res.json();
+alert(errorData.detail);
     setUsername("");
     setEmail("");
     setPassword("");
@@ -55,7 +56,7 @@ alert("Registered successfully");
             </span>
             </div>
 
-      <button onClick={handleRegister}>
+      <button type="button" onClick={handleRegister}>
         Register
       </button>
       <p className="auth-switch">

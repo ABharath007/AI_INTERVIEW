@@ -15,6 +15,11 @@ function Analysis() {
                         Authorization: `Bearer ${token}`
                     }
                 });
+                if (res.status === 401) {
+                    localStorage.clear();
+                    window.location.reload();
+                    return;
+                }
                 const data = await res.json();
                 setAnalysis(data);
             } catch (err) {

@@ -10,6 +10,12 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+if not SECRET_KEY:
+    raise Exception("SECRET_KEY not set")
+if not ALGORITHM:
+    raise Exception("ALGORITHM not set")
+if not ACCESS_TOKEN_EXPIRE_MINUTES:
+    raise Exception("ACCESS_TOKEN_EXPIRE_MINUTES not set")
 
 def create_access_token(data:dict):
     to_encode = data.copy()

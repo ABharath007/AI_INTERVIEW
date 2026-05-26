@@ -24,6 +24,11 @@ function History({ setPage }) {
                     Authorization: `Bearer ${token}`
                 }
             });
+            if (res.status === 401) {
+                localStorage.clear();
+                window.location.reload();
+                return;
+            }
             const data = await res.json();
             setAnswers(data);
         } catch (err) {
@@ -63,7 +68,9 @@ function History({ setPage }) {
                     <p><strong>Score:</strong> {ans.score}/10</p>
                     <p>
                         <strong>Answer:</strong>{" "}
-                        {ans.answer_text.slice(0,80)}...
+                        {ans.answer_text.length > 80
+                        ? ans.answer_text.slice(0,80) + "..."
+                        : ans.answer_text}
                     </p>
 
                     

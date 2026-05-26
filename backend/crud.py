@@ -96,16 +96,56 @@ Return ONLY valid JSON in this exact format:
         "role": "user",
         "content": prompt
       }
-    ])
+    ],
+    temperature=0.7,
+    timeout=20)
   
   return response.choices[0].message.content
 
-def generate_question_ai(topic = None, difficulty = None):
+def generate_question_ai(topic = None, difficulty = None, mode = None):
   
   prompt = "You are an interviewer.\n\n"
+  if mode == "HR":
+    prompt += """
+Interview Type:
+HR Behavioral Interview
 
+Ask ONLY behavioral interview questions.
+No technical questions.
+"""
+  elif mode == "Technical":
+    prompt += """
+Interview Type:
+Technical Interview
+
+Ask ONLY technical interview questions.
+"""
+  elif mode == "Mixed":
+    prompt += """
+Interview Type:
+Mixed Interview
+
+Mix HR and technical questions randomly.
+"""
+  elif mode == "Rapid Fire":
+    prompt += """
+Interview Type:
+Rapid Fire
+
+Generate short quick interview questions.
+Keep question concise.
+"""
   if topic:
     prompt += f"Topic: {topic}\n"
+  else:
+    prompt += """
+Topic:
+DSA, OOP, DBMS, Operating Systems,
+System Design, Web Development,
+Java, Python, JavaScript,
+React, SQL, Computer Networks,
+HR Behavioral Questions
+"""
 
   if difficulty:
     prompt += f"Difficulty: {difficulty}\n"
@@ -120,7 +160,7 @@ STRICT RULES:
 - No explanation
 - No extra text
 - No formatting
-- Maximum 15 words
+- Maximum 20 words
 
 Correct Example:
 What is polymorphism in OOP?
@@ -134,7 +174,9 @@ Explain ...
   # client = Groq(api_key=api_key)
   response = client.chat.completions.create(
   model = "llama-3.1-8b-instant",
-  messages =[{"role":"user","content":prompt}]
+  messages =[{"role":"user","content":prompt}],
+  temperature=0.7,
+  timeout=20
   )
   return response.choices[0].message.content
 
@@ -173,7 +215,8 @@ def analyze_performance_ai(answers):
   response = client.chat.completions.create(
     model = "llama-3.1-8b-instant",
     temperature=0,
-    messages=[{"role":"user","content":prompt}]
+    messages=[{"role":"user","content":prompt}],
+    timeout=20
   )
   return response.choices[0].message.content
 

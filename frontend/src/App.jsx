@@ -16,7 +16,7 @@ function App() {
   const [page, setPage] = useState("home"); // home | history
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user_name");
+    localStorage.removeItem("username");
     setLoggedIn(false);
     setAuthPage("login");
     setPage("home");
@@ -37,7 +37,7 @@ function App() {
 }
 return (
   <div className = "main-wrapper">
-    <Navbar setPage={setPage} onLogout={handleLogout} />
+    <Navbar setPage={setPage} onLogout={handleLogout} page={page} />
     <div className = "container">
     {page==="home" && <Home/>}
     {page==="history" && <History  setPage={setPage}/>}

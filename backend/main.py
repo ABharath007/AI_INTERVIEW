@@ -42,6 +42,9 @@ def home():
 @app.post("/answer",response_model=AnswerResponse)
 def submit_answer(data: AnswerCreate, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     
+    if not data.answer.strip():
+        raise HTTPException(status_code=400, detail="Answer cannot be empty")
+    
     if data.total_time < 0 or data.total_time > 3600:
         raise HTTPException(status_code=400, detail="Invalid time")
     
@@ -72,12 +75,16 @@ def submit_answer(data: AnswerCreate, db: Session = Depends(get_db), current_use
 def get_question(
                 db: Session = Depends(get_db),
                 topic: Optional[str] = None,
-                difficulty: Optional[str] = None
+                difficulty: Optional[str] = None,
+                mode: Optional[str] = None,
+                current_user: int = Depends(get_current_user)
     ):
-    answers = crud.get_answers(db)
+    answers = db.query(models.Answer).filter(
+    models.Answer.user_id == current_user
+).all()
     
     if not answers or len(answers) < 3:
-        return {"question": crud.generate_question_ai(topic, difficulty)}
+        return {"question": crud.generate_question_ai(topic, difficulty, mode)}
     
     
     try:
@@ -92,11 +99,11 @@ def get_question(
             if weak_areas and random.random() < FOCUS_RATIO:
                 topic = random.choice(weak_areas)
             
-        question = crud.generate_question_ai(topic, difficulty)
+        question = crud.generate_question_ai(topic, difficulty, mode)
         
     except Exception as e :
         print(f"Error occurred: {e}")
-        question = crud.generate_question_ai(topic, difficulty)
+        question = crud.generate_question_ai(topic, difficulty, mode)
         
     return {"question": question}
 
@@ -213,12 +220,17 @@ def google_login(data: dict, db: Session = Depends(get_db)):
         "username": user.username,
     }
 @app.post("/followup")
-def generate_folowup(data:dict):
+def generate_folowup(data:dict,
+    current_user: int = Depends(get_current_user)):
     question = data["question"]
     answer = data["answer"]
-    
+    mode = data.get("mode", "Technical")
+    if mode == "HR":
+        interviewer_type = "HR Interviewer"
+    else:
+        interviewer_type = "Technical Interviewer"
     prompt = f"""
-    You are a technical interviewer.
+    You are a {interviewer_type}.
 
     Original Question:
     {question}
