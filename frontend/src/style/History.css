@@ -37,3 +37,17 @@
   margin-top: 10px;
   font-size: 13px;
 }
+
+.followup-section {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.followup-card {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border-left: 4px solid var(--primary);
+}

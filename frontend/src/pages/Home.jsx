@@ -18,6 +18,8 @@ function Home({ onLogout }) {
   const [error, setError] = useState(null);
 
   const [followUpCount, setFollowUpCount] = useState(0);
+  const [currentQuestionId, setCurrentQuestionId] = useState(null);
+  const [isFollowUp, setIsFollowUp] = useState(false);
 
   // Load Question
   const loadQuestion = async () => {
@@ -54,7 +56,7 @@ function Home({ onLogout }) {
       setFirstInputTime(null);
       setStartTime(Date.now());
       setFollowUpCount(0);
-
+      setIsFollowUp(false);
     } catch (err) {
       setError("Failed to load question");
     } finally {
@@ -103,6 +105,8 @@ function Home({ onLogout }) {
             time_to_start,
             time_to_answer,
             total_time,
+            is_followup: isFollowUp,
+            parent_question_id: currentQuestionId,
           }),
         }
       );
@@ -120,6 +124,7 @@ function Home({ onLogout }) {
       const data = await res.json();
 
       setFeedback(data);
+      setCurrentQuestionId(data.id);
 
     } catch (err) {
       setError(err.message);
@@ -145,7 +150,8 @@ function Home({ onLogout }) {
           body: JSON.stringify({
             question,
             answer,
-            mode
+            mode,
+            parent_question_id: currentQuestionId,
           }),
         }
       );
@@ -157,8 +163,9 @@ function Home({ onLogout }) {
       }
 
       const data = await res.json();
-
+      
       setQuestion(data.followup);
+      setIsFollowUp(true);
 
       setAnswer("");
       setFeedback(null);
@@ -287,8 +294,10 @@ function Home({ onLogout }) {
           <div className="home-card feedback-card">
 
             <h3>Score: {feedback.score}/10</h3>
-
+            <h4>Feedback</h4>
             <p>{feedback.feedback}</p>
+            <h4>Ideal Answer</h4>
+            <p>{feedback.ideal_answer}</p>
 
           </div>
         )}

@@ -6,6 +6,8 @@ class AnswerCreate(BaseModel):
     time_to_start: int
     time_to_answer: int
     total_time: int
+    is_followup: bool = False
+    parent_question_id: int | None = None
 
 class AnswerResponse(BaseModel):
     id: int
@@ -15,8 +17,11 @@ class AnswerResponse(BaseModel):
     time_to_answer: int
     total_time: int
     word_count: int
-    score: int
+    score: float
     feedback: str
+    ideal_answer: str
+    is_followup: bool
+    parent_question_id: int | None
     model_config = {
     "from_attributes": True}
 

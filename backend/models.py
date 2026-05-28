@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Text, String, ForeignKey
+from sqlalchemy import Column, Integer, Text, String, ForeignKey, Boolean
 from database import Base
 
 class Answer(Base):
@@ -14,6 +14,9 @@ class Answer(Base):
     word_count = Column(Integer)
     score = Column(Integer)
     feedback = Column(Text)
+    ideal_answer = Column(Text)
+    is_followup = Column(Boolean, default=False)
+    parent_question_id = Column(Integer, ForeignKey("answers.id"), nullable=True)
     
 class User(Base):
     __tablename__ = "users"

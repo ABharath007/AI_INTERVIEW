@@ -53,10 +53,12 @@ def submit_answer(data: AnswerCreate, db: Session = Depends(get_db), current_use
         parsed = json.loads(ai_result)
         score  = parsed["score"]
         feedback = parsed["feedback"]
+        ideal_answer = parsed.get("ideal_answer", "")
     except Exception:
         score = 0
         feedback = ai_result
-    answer = crud.create_answer(db, data, current_user, score, feedback)
+        ideal_answer = ""
+    answer = crud.create_answer(db, data, current_user, score, feedback, ideal_answer)
 
     return {
         "id": answer.id,
@@ -67,7 +69,10 @@ def submit_answer(data: AnswerCreate, db: Session = Depends(get_db), current_use
         "total_time": answer.total_time,
         "word_count": answer.word_count,
         "score": score,
-        "feedback": feedback
+        "feedback": feedback,
+        "ideal_answer": ideal_answer,
+        "is_followup": answer.is_followup,
+        "parent_question_id": answer.parent_question_id
         }
 
 
@@ -225,6 +230,7 @@ def generate_folowup(data:dict,
     question = data["question"]
     answer = data["answer"]
     mode = data.get("mode", "Technical")
+    parent_question_id = data.get("parent_question_id")
     if mode == "HR":
         interviewer_type = "HR Interviewer"
     else:

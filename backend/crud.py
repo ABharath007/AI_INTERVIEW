@@ -11,7 +11,7 @@ if not api_key:
     raise Exception("GROQ_API_KEY not set")
 client = Groq(api_key=api_key)
 
-def create_answer(db: Session, answer: schemas.AnswerCreate, current_user: int, score: int, feedback: str):
+def create_answer(db: Session, answer: schemas.AnswerCreate, current_user: int, score: int, feedback: str, ideal_answer: str):
     
     answer_text = answer.answer
     word_count = len(answer_text.split())
@@ -25,7 +25,10 @@ def create_answer(db: Session, answer: schemas.AnswerCreate, current_user: int, 
                               total_time = answer.total_time,
                               word_count = word_count,
                               score = score,
-                              feedback = feedback)
+                              feedback = feedback,
+                              ideal_answer = ideal_answer,
+                              is_followup = answer.is_followup,
+                              parent_question_id = answer.parent_question_id)
     db.add(db_answer)
     db.commit()
     db.refresh(db_answer)
@@ -69,22 +72,33 @@ Performance Metrics:
 - Total Time: {total_time} seconds
 
 Evaluation Rules:
-- Score must be between 0 and 10.
-- Do not overly penalize long thinking time.
-- Timing should only slightly influence evaluation.
-- Focus mainly on answer quality.
-- Feedback must be short, clear, and practical.
-- Feedback maximum 3 lines.
-- No bullet points.
-- No numbering.
-- No markdown.
-- No extra explanation outside JSON.
+
+FEEDBACK:
+- Feedback must be short, clear, and practical
+- Maximum 3 lines
+- Mention mistakes and improvements only
+
+IDEAL ANSWER:
+- Generate a concise ideal interview answer
+- Ideal answer should be educational
+- Maximum 5 lines
+- Should directly answer the interview question properly
+
+OUTPUT RULES:
+- Score must be between 0 and 10
+- Do not overly penalize long thinking time
+- Timing should only slightly influence evaluation
+- No bullet points
+- No numbering
+- No markdown
+- No extra explanation outside JSON
 
 Return ONLY valid JSON in this exact format:
 
 {{
     "score": 0,
-    "feedback": "your feedback here"
+    "feedback": "your feedback here",
+    "ideal_answer": "the ideal answer here"
 }}
 """
   # api_key = os.getenv("GROQ_API_KEY")
