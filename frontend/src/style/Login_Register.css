@@ -77,3 +77,20 @@
   font-weight:600;
   user-select:none;
 }
+
+.back-btn{
+    background:none;
+    border:none;
+    color:#2563eb;
+    cursor:pointer;
+    font-size:15px;
+    padding:0;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.back-btn:hover{
+    text-decoration:underline;
+}

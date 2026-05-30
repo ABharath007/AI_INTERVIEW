@@ -49,12 +49,16 @@ function Login({ onLogin, onSwitch }) {
     return (
         <div className="auth-page">
             <img src={logo} alt="InterviAI" className="page-logo" />
+        
         <form className = "login-card"
         onSubmit={(e) => {
         e.preventDefault();
         handleLogin();
         }}>
-            
+            <button type="button" className="back-btn"
+            onClick={() => onSwitch("LandingPage")}>
+                ← Back
+            </button>
             <h2>Login</h2>
             <input
                 placeholder = "Email"
@@ -82,7 +86,7 @@ function Login({ onLogin, onSwitch }) {
             {error && <p className = "error">{error}</p>}
             <p className="auth-switch">
       Don't have an account?
-      <span onClick={() => onSwitch("register")}> Register</span>
+      <span onClick={() => onSwitch("Register")}> Register</span>
     </p>
     <GoogleLogin
   onSuccess={handleGoogleSuccess}

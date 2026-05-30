@@ -151,8 +151,13 @@ def get_analysis(
     ai_result = crud.analyze_performance_ai(answers)
     try:
         parsed = json.loads(ai_result)
-    except:
-        return {"analysis": ai_result}
+    except Exception as e:
+        print("Analysis JSON Parse Error:", e)
+        print(ai_result)
+        parsed = {
+            "weak_areas": [],
+            "strong_areas": []
+        }
     return {
         "weak_areas": parsed.get("weak_areas", []),
         "strong_areas": parsed.get("strong_areas", []),

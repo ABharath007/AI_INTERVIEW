@@ -202,6 +202,7 @@ def analyze_performance_ai(answers):
     formatted_data += f"""
     Question: {ans.question}
     Score: {ans.score}
+    Feedback: {ans.feedback}
     """
   prompt = f"""
   Analyze the interview performance 
@@ -209,14 +210,21 @@ def analyze_performance_ai(answers):
   Data:
   {formatted_data}
   
-  Identify:
-  1.weak_areas(low scores)
-  2.strong_areas(high scores)
-  Rules:
-  - Return ONLY valid JSON
-  - Do NOT include explanation
-  - Do NOT include markdown
-  - Do NOT include text before or after JSON
+ Identify:
+
+1. Top 5 weak areas only
+2. Top 5 strong areas only
+
+Rules:
+- Maximum 5 weak areas
+- Maximum 5 strong areas
+- Remove duplicates
+- Return short topic names only
+- Return valid JSON only
+- Return ONLY valid JSON
+- Do NOT include explanation
+- Do NOT include markdown
+- Do NOT include text before or after JSON
   
   return ONLY valid JSON in the format:
   {{

@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Navbar from "./pages/Navbar";
 import History from "./pages/History";
 import Analysis from "./pages/Analysis";
+import LandingPage from "./pages/LandingPage";
 import './App.css';
 
 function App() {
@@ -12,25 +13,39 @@ function App() {
     localStorage.getItem("token") !== null
   );
 
-  const [authPage, setAuthPage] = useState("login"); // login | register
+  const [authPage, setAuthPage] = useState("LandingPage"); // login | register
   const [page, setPage] = useState("home"); // home | history
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     setLoggedIn(false);
-    setAuthPage("login");
+    setAuthPage("LandingPage");
     setPage("home");
   };
 
  if (!loggedIn) {
-  return authPage === "login" ? (
-    <Login 
-      onLogin={() => setLoggedIn(true)} 
-      onSwitch={setAuthPage}
-    />
-  ) : (
-    <Register 
-      onRegisterSuccess={() => setAuthPage("login")} 
+
+  if (authPage === "LandingPage") {
+    return (
+      <LandingPage
+        onLogin={() => setAuthPage("Login")}
+        onRegister={() => setAuthPage("Register")}
+      />
+    );
+  }
+
+  if (authPage === "Login") {
+    return (
+      <Login
+        onLogin={() => setLoggedIn(true)}
+        onSwitch={setAuthPage}
+      />
+    );
+  }
+
+  return (
+    <Register
+      onRegisterSuccess={() => setAuthPage("Login")}
       onSwitch={setAuthPage}
     />
   );

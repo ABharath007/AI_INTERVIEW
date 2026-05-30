@@ -34,7 +34,10 @@ alert(errorData.detail);
     <div className="auth-page">
       <img src={logo} alt="InterviAI" className="page-logo" />
     <form className="login-card">
-      
+      <button type="button" className="back-btn"
+            onClick={() => onSwitch("LandingPage")}>
+                ← Back
+            </button>
       <h2>Register</h2>
 
        <input value={username} onChange={(e)=>setUsername(e.target.value)} placeholder="Username" />
@@ -61,7 +64,7 @@ alert(errorData.detail);
       </button>
       <p className="auth-switch">
   Already have an account?
-  <span onClick={() => onSwitch("login")}> Login</span>
+  <span onClick={() => onSwitch("Login")}> Login</span>
 </p>
     </form>
     </div>

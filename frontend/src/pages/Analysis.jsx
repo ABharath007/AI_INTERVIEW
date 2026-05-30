@@ -21,6 +21,7 @@ function Analysis() {
                     return;
                 }
                 const data = await res.json();
+                console.log(data);
                 setAnalysis(data);
             } catch (err) {
                 setError("Failed to fetch analysis. Please try again later.");
