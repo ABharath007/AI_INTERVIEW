@@ -21,7 +21,10 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"), overrid
     
 
 app = FastAPI()
-Base.metadata.create_all(bind = engine)
+from database import engine
+import models
+
+models.Base.metadata.create_all(bind=engine)
 FOCUS_RATIO = 0.7
 app.add_middleware(
     CORSMiddleware,
