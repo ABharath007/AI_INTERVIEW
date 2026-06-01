@@ -82,19 +82,19 @@ InterviAI is a full-stack AI-powered interview preparation platform that helps u
 
 ### Landing Page
 
-![Landing Page](assets/landing-preview.png)
+![Landing Page](frontend/src/assets/landing-preview.png)
 
 ### Home Page
 
-![Home Page](assets/home-preview.png)
+![Home Page](frontend/src/assets/home-preview.png)
 
 ### History Page
 
-![History Page](assets/history-preview.png)
+![History Page](frontend/src/assets/history-preview.png)
 
 ### Analysis Dashboard
 
-![Analysis Dashboard](assets/analysis-preview.png)
+![Analysis Dashboard](frontend/src/assets/analysis-preview.png)
 
 ---
 
