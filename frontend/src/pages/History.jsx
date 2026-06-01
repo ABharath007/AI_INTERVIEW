@@ -9,6 +9,8 @@ function History({ setPage }) {
     const [expandedId, setExpandedId] = useState(null);
     const [expandedFollowupId, setExpandedFollowupId] = useState(null);
     const token = localStorage.getItem("token");
+    const [sessions, setSessions] = useState([]);
+    const [selectedSession, setSelectedSession] = useState("");
 
     const toggleExpand = (id) => {
         setExpandedId(expandedId === id ? null : id);
@@ -17,6 +19,19 @@ function History({ setPage }) {
     const toggleFollowupExpand = (id) => {
         setExpandedFollowupId(expandedFollowupId === id ? null : id);
     }
+    const fetchSessions = async () => {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/sessions`,
+    {
+      headers:{
+        Authorization:`Bearer ${token}`
+      }
+    }
+  );
+
+  const data = await res.json();
+  setSessions(data);
+};
 
     const fetchAnswers = async () => {
         try {
@@ -43,6 +58,7 @@ function History({ setPage }) {
 
     useEffect(() => {
         fetchAnswers();
+        fetchSessions();
     }, [minScore, sort]);
 
     return (
@@ -51,7 +67,18 @@ function History({ setPage }) {
     <h2>Your History</h2>
 
     <div style={{ marginBottom: "20px" }}>
+<select
+  value={selectedSession}
+  onChange={(e)=>setSelectedSession(e.target.value)}
+>
+  <option value="">All Sessions</option>
 
+  {sessions.map((s)=>(
+    <option key={s.id} value={s.id}>
+  #{s.id} | {s.mode} | {s.topic || "General"}
+</option>
+  ))}
+</select>
       <input
         type="number"
         placeholder="Min Score"
@@ -77,13 +104,38 @@ function History({ setPage }) {
 
     {error && <p style={{ color: "red" }}>{error}</p>}
 
-    {answers.length === 0 ? (
-      <p>No history found.</p>
-    ) : (
-      answers
-        .filter((ans) => !ans.is_followup)
-        .map((ans) => {
+    {(() => {
+  const filteredAnswers = answers
+    .filter((ans) => !ans.is_followup)
+    .filter(
+      (ans) =>
+        !selectedSession ||
+        ans.session_id === Number(selectedSession)
+    );
 
+  if (answers.length === 0) {
+  return (
+    <div className="empty-history">
+      <h3>No Interview History Yet</h3>
+      <p>
+        Start your first interview session to see your history here.
+      </p>
+    </div>
+  );
+}
+
+if (filteredAnswers.length === 0) {
+  return (
+    <div className="empty-history">
+      <h3>No questions answered in this session</h3>
+      <p>
+        This session was started but no answers were submitted.
+      </p>
+    </div>
+  );
+}
+
+  return filteredAnswers.map((ans) => {
           const followups = answers.filter(
             (a) => a.parent_question_id === ans.id
           );
@@ -104,7 +156,20 @@ function History({ setPage }) {
 
               {expandedId === ans.id && (
                 <div style={{ marginTop: "10px" }}>
-
+                  <p><strong>Session:</strong> {ans.session_id}</p>
+                  {sessions
+  .filter((s) => s.id === ans.session_id)
+  .map((s) => (
+    <div key={s.id}>
+      <p><strong>Mode:</strong> {s.mode}</p>
+      <p><strong>Topic:</strong> {s.topic || "General"}</p>
+      <p><strong>Difficulty:</strong> {s.difficulty || "Any"}</p>
+      <p><strong>Questions:</strong> {s.total_questions}</p>
+      <p><strong>Follow Ups:</strong> {s.followup_count}</p>
+      <p><strong>Average Score:</strong> {s.average_score}</p>
+    </div>
+))}
+                  <p><strong>Date:</strong>{" "}{new Date(ans.created_at).toLocaleString()}</p>
                   <p><strong>Full Answer:</strong> {ans.answer_text}</p>
 
                   <p>
@@ -188,9 +253,8 @@ function History({ setPage }) {
               </button>
 
             </div>
-          );
-        })
-    )}
+          );        });
+})()}
 
     <button
       onClick={() => setPage("home")}

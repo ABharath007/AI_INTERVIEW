@@ -18,6 +18,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
+    localStorage.removeItem("session_id");
     setLoggedIn(false);
     setAuthPage("LandingPage");
     setPage("home");

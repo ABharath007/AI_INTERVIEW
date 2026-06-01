@@ -28,7 +28,9 @@ def create_answer(db: Session, answer: schemas.AnswerCreate, current_user: int, 
                               feedback = feedback,
                               ideal_answer = ideal_answer,
                               is_followup = answer.is_followup,
-                              parent_question_id = answer.parent_question_id)
+                              parent_question_id = answer.parent_question_id,
+                              session_id = answer.session_id
+                              )
     db.add(db_answer)
     db.commit()
     db.refresh(db_answer)

@@ -8,18 +8,18 @@ function Home({ onLogout }) {
   const [startTime, setStartTime] = useState(null);
   const [firstInputTime, setFirstInputTime] = useState(null);
   const [feedback, setFeedback] = useState(null);
-
   const [topic, setTopic] = useState("");
   const [difficulty, setDifficulty] = useState("");
-
   const [mode, setMode] = useState("Technical");
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  const [rootQuestionId, setRootQuestionId] = useState(null);
   const [followUpCount, setFollowUpCount] = useState(0);
   const [currentQuestionId, setCurrentQuestionId] = useState(null);
   const [isFollowUp, setIsFollowUp] = useState(false);
+  const [sessionStarted, setSessionStarted] = useState(
+  !!localStorage.getItem("session_id")
+);
 
   // Load Question
   const loadQuestion = async () => {
@@ -55,7 +55,6 @@ function Home({ onLogout }) {
       setFeedback(null);
       setFirstInputTime(null);
       setStartTime(Date.now());
-      setFollowUpCount(0);
       setIsFollowUp(false);
     } catch (err) {
       setError("Failed to load question");
@@ -64,6 +63,50 @@ function Home({ onLogout }) {
     }
   };
 
+const createSession = async () => {
+  const existingSession =
+    localStorage.getItem("session_id");
+
+  if (existingSession) {
+    setSessionStarted(true);
+    return;
+  }
+
+  const res = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/session`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify({
+        mode,
+        topic,
+        difficulty
+      })
+    }
+  );
+
+  const data = await res.json();
+
+  localStorage.setItem(
+    "session_id",
+    data.session_id
+  );
+
+  setSessionStarted(true);
+};
+  const startInterview = async () => {
+  await createSession();
+  setFollowUpCount(0);
+  setCurrentQuestionId(null);
+  setIsFollowUp(false);
+  setRootQuestionId(null);
+  await loadQuestion();
+
+  setStarted(true);
+};
   // Handle Typing
   const handleChange = (e) => {
     setAnswer(e.target.value);
@@ -90,7 +133,7 @@ function Home({ onLogout }) {
         : 0;
 
       const total_time = Math.floor((submitTime - startTime) / 1000);
-
+      
       const res = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/answer`,
         {
@@ -106,7 +149,8 @@ function Home({ onLogout }) {
             time_to_answer,
             total_time,
             is_followup: isFollowUp,
-            parent_question_id: currentQuestionId,
+            parent_question_id: isFollowUp ? rootQuestionId : null,
+            session_id: Number(localStorage.getItem("session_id"))
           }),
         }
       );
@@ -125,6 +169,9 @@ function Home({ onLogout }) {
 
       setFeedback(data);
       setCurrentQuestionId(data.id);
+      if (!isFollowUp) {
+      setRootQuestionId(data.id);
+    }
 
     } catch (err) {
       setError(err.message);
@@ -133,6 +180,35 @@ function Home({ onLogout }) {
     }
   };
 
+  const endSession = async () => {
+  const sessionId = localStorage.getItem("session_id");
+
+  if (!sessionId) return;
+
+  await fetch(
+    `${import.meta.env.VITE_API_BASE_URL}/session/${sessionId}/end`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    }
+  );
+
+  localStorage.removeItem("session_id");
+
+  setSessionStarted(false);
+  setStarted(false);
+  setRootQuestionId(null);
+  setQuestion("");
+  setAnswer("");
+  setFeedback(null);
+  setCurrentQuestionId(null);
+  setFollowUpCount(0);
+  setIsFollowUp(false);
+
+  alert("Session Ended");
+};
   // Follow-Up Question
   const handleFollowUp = async () => {
     try {
@@ -151,7 +227,7 @@ function Home({ onLogout }) {
             question,
             answer,
             mode,
-            parent_question_id: currentQuestionId,
+            parent_question_id: rootQuestionId,
           }),
         }
       );
@@ -185,7 +261,13 @@ function Home({ onLogout }) {
     <div className="main-section">
       <div className="container">
 
-        <h1>Interview Practice</h1>
+        <h1>
+  Hi {localStorage.getItem("username") || "Candidate"} 👋
+</h1>
+
+<p className="welcome-text">
+  Let's start your InterviAI session.
+</p>
 
         {/* TOP SECTION */}
         <div className="section">
@@ -255,7 +337,7 @@ function Home({ onLogout }) {
 
         {/* QUESTION */}
         <div className="section">
-          {question && (
+          {sessionStarted && question && (
             <div className="home-card question-box">
 
               <p className="mode-badge">
@@ -273,7 +355,7 @@ function Home({ onLogout }) {
         {/* ANSWER */}
         <div className="section">
           <div className="home-card">
-            {question ? (
+            {sessionStarted && question ? (
               <textarea
                 value={answer}
                 onChange={handleChange}
@@ -303,57 +385,80 @@ function Home({ onLogout }) {
         )}
 
         {/* BUTTONS */}
-        <div className="submit-section">
+<div className="submit-section">
 
-          {/* SUBMIT */}
-          <button
-            onClick={handleSubmit}
-            disabled={loading || !answer.trim() || !question}
-            className="small-btn"
-          >
-            {loading ? "Submitting..." : "Submit"}
-          </button>
+  {!feedback ? (
+    <>
+      <button
+        onClick={handleSubmit}
+        disabled={loading || !answer.trim() || !question}
+        className="small-btn"
+      >
+        {loading ? "Submitting..." : "Submit"}
+      </button>
 
-          {/* START / NEXT */}
-          {!feedback && (
-            <button
-              disabled={loading}
-              onClick={() => {
-                loadQuestion();
-                setStarted(true);
-              }}
-              className="small-btn"
-            >
-              {started ? "Next Question" : "Start Interview"}
-            </button>
-          )}
+      
 
-          {/* FEEDBACK BUTTONS */}
-          {feedback && (
-            <>
-              <button
-                onClick={handleFollowUp}
-                className="small-btn"
-                disabled={loading || followUpCount >= 2}
-              >
-                {followUpCount >= 2
-                  ? "Follow-Up Limit Reached"
-                  : "Follow-Up"}
-              </button>
+      {!sessionStarted ? (
+        <button
+          onClick={startInterview}
+          className="small-btn"
+        >
+          Start Session
+        </button>
+      ) : (
+        <>
+        <button
+        onClick={() => {
+          setFeedback(null);
+          loadQuestion();
+        }}
+        disabled={loading || !sessionStarted}
+        className="small-btn"
+      >
+        Next Question
+      </button>
+        <button
+          onClick={endSession}
+          className="small-btn"
+        >
+          End Session
+        </button>
+      </>
+      )}
+    </>
+  ) : (
+    <>
+      <button
+        onClick={handleFollowUp}
+        disabled={loading || followUpCount >= 2}
+        className="small-btn"
+      >
+        {followUpCount >= 2
+          ? "Follow-Up Limit Reached"
+          : "Follow-Up"}
+      </button>
 
-              <button
-                onClick={() => {
-                  loadQuestion();
-                }}
-                className="small-btn"
-                disabled={loading}
-              >
-                Next Question
-              </button>
-            </>
-          )}
+      <button
+        onClick={() => {
+          setFeedback(null);
+          loadQuestion();
+        }}
+        className="small-btn"
+      >
+        Next Question
+      </button>
 
-        </div>
+      <button
+        onClick={endSession}
+        className="small-btn"
+      >
+        End Session
+      </button>
+    </>
+  )}
+
+</div>
 
         {/* ERROR */}
         {error && (

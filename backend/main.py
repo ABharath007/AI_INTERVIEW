@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Depends, Query, HTTPException
-from schemas import AnswerCreate , AnswerResponse, UserCreate, UserLogin
+from schemas import AnswerCreate , AnswerResponse, UserCreate, UserLogin, SessionCreate
 from database import engine, Base ,SessionLocal, get_db
 import models
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 import crud
 from auth import create_access_token, get_current_user
 from typing import List, Optional
@@ -59,7 +60,18 @@ def submit_answer(data: AnswerCreate, db: Session = Depends(get_db), current_use
         feedback = ai_result
         ideal_answer = ""
     answer = crud.create_answer(db, data, current_user, score, feedback, ideal_answer)
+    if data.session_id:
+        session = db.query(models.InterviewSession).filter(
+            models.InterviewSession.id == data.session_id
+        ).first()
 
+        if session:
+            if data.is_followup:
+                session.followup_count += 1
+            else:
+                session.total_questions += 1
+
+            db.commit()
     return {
         "id": answer.id,
         "question": data.question,
@@ -72,7 +84,8 @@ def submit_answer(data: AnswerCreate, db: Session = Depends(get_db), current_use
         "feedback": feedback,
         "ideal_answer": ideal_answer,
         "is_followup": answer.is_followup,
-        "parent_question_id": answer.parent_question_id
+        "parent_question_id": answer.parent_question_id,
+        "session_id": answer.session_id
         }
 
 
@@ -264,3 +277,105 @@ Rules:
 
     return {"followup": followup}
     
+    
+@app.post("/session")
+def create_session(data: SessionCreate, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    
+    session = models.InterviewSession(
+        user_id = current_user,
+        mode = data.mode,
+        topic = data.topic,
+        difficulty = data.difficulty
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+    
+    return {"session_id": session.id}
+
+@app.get("/sessions")
+def get_sessions(
+    db: Session = Depends(get_db),
+    current_user: int = Depends(get_current_user)
+):
+    sessions = (
+        db.query(models.InterviewSession)
+        .filter(
+            models.InterviewSession.user_id == current_user
+        )
+        .order_by(
+            models.InterviewSession.id.desc()
+        )
+        .all()
+    )
+
+    result = []
+
+    for s in sessions:
+        answers = (
+            db.query(models.Answer)
+            .filter(models.Answer.session_id == s.id)
+            .all()
+        )
+
+        avg_score = (
+            round(sum(a.score for a in answers) / len(answers), 2)
+            if answers else 0
+        )
+
+        result.append({
+            "id": s.id,
+            "mode": s.mode,
+            "topic": s.topic,
+            "difficulty": s.difficulty,
+            "total_questions": s.total_questions,
+            "followup_count": s.followup_count,
+            "start_time": s.start_time,
+            "end_time": s.end_time,
+            "average_score": avg_score
+        })
+
+    return result
+    
+@app.get("/sessions/{session_id}/answers")
+def get_session_answers(
+    session_id: int,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(get_current_user)
+):
+    
+    answers = (
+        db.query(models.Answer)
+        .filter(
+            models.Answer.user_id == current_user,
+            models.Answer.session_id == session_id
+        )
+        .order_by(models.Answer.id.asc())
+        .all()
+    )
+
+    return answers
+
+@app.put("/session/{session_id}/end")
+def end_session(
+    session_id: int,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(get_current_user)
+):
+    session = (
+        db.query(models.InterviewSession)
+        .filter(
+            models.InterviewSession.id == session_id,
+            models.InterviewSession.user_id == current_user
+        )
+        .first()
+    )
+
+    if not session:
+        raise HTTPException(404, "Session not found")
+
+    session.end_time = func.now()
+
+    db.commit()
+
+    return {"message": "Session ended"}

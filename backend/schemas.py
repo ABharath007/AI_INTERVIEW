@@ -8,6 +8,7 @@ class AnswerCreate(BaseModel):
     total_time: int
     is_followup: bool = False
     parent_question_id: int | None = None
+    session_id: int | None = None
 
 class AnswerResponse(BaseModel):
     id: int
@@ -22,6 +23,7 @@ class AnswerResponse(BaseModel):
     ideal_answer: str
     is_followup: bool
     parent_question_id: int | None
+    session_id: int | None
     model_config = {
     "from_attributes": True}
 
@@ -33,3 +35,8 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     email: str
     password: str
+    
+class SessionCreate(BaseModel):
+    mode: str
+    topic: str | None = None
+    difficulty: str | None = None
